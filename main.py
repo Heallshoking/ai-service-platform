@@ -127,8 +127,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Static files - ОТКЛЮЧЕНО (отдаём через FileResponse напрямую)
-# app.mount("/static", StaticFiles(directory="static"), name="static")
+# Static files - Монтируем только если папка существует
+if Path("static").exists():
+    app.mount("/static", StaticFiles(directory="static"), name="static")
+    print("✅ Static files монтированы через /static")
+else:
+    print("⚠️ Static files НЕ монтированы (папка не найдена)")
 
 # Инициализация БД при старте
 @app.on_event("startup")
@@ -278,7 +282,35 @@ async def root():
     """Главная страница - AI чат для клиентов"""
     html_path = Path("static/ai-chat.html")
     if not html_path.exists():
-        raise HTTPException(status_code=500, detail=f"HTML file not found: {html_path.absolute()}. CWD: {Path.cwd()}")
+        # Fallback: простой HTML с информацией
+        from fastapi.responses import HTMLResponse
+        return HTMLResponse(content=f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>AI Service Platform</title>
+            <meta charset="utf-8">
+        </head>
+        <body style="font-family: Arial; max-width: 800px; margin: 50px auto; padding: 20px;">
+            <h1>⚠️ Static Files Not Found</h1>
+            <p><strong>Problem:</strong> HTML files are not deployed to Timeweb App Platform.</p>
+            <p><strong>Current path:</strong> {Path.cwd()}</p>
+            <p><strong>Expected:</strong> {html_path.absolute()}</p>
+            <hr>
+            <h2>✅ API is Working</h2>
+            <ul>
+                <li><a href="/api">/api</a> - API Info</li>
+                <li><a href="/docs">/docs</a> - API Documentation (Swagger)</li>
+                <li><a href="/health">/health</a> - Health Check</li>
+            </ul>
+            <hr>
+            <h3>🛠️ Quick Fix:</h3>
+            <p>1. Check if <code>static/</code> folder is in GitHub repository</p>
+            <p>2. Ensure Timeweb pulls latest code from GitHub</p>
+            <p>3. Check deployment logs on Timeweb dashboard</p>
+        </body>
+        </html>
+        """, status_code=200)
     return FileResponse(html_path)
 
 @app.get("/form")
