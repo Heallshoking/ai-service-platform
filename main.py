@@ -337,7 +337,14 @@ async def estimate_price(data: dict):
 @app.get("/health")
 async def health_check():
     """Проверка здоровья сервиса"""
-    return {"status": "healthy", "timestamp": datetime.now().isoformat()}
+    import os
+    return {
+        "status": "healthy", 
+        "timestamp": datetime.now().isoformat(),
+        "cwd": os.getcwd(),
+        "static_exists": os.path.exists("static"),
+        "master_html_exists": os.path.exists("static/master-dashboard.html")
+    }
 
 # ==================== МАСТЕРА ====================
 
