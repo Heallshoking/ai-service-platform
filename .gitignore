@@ -1,0 +1,55 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+ENV/
+
+# Environment
+.env
+*.env
+!.env.example
+
+# Google Credentials (СЕКРЕТЫ!)
+credentials.json
+**/credentials.json
+token.json
+**/token.json
+token.pickle
+**/token.pickle
+
+# Старые проекты (НЕ НУЖНЫ В РЕПО!)
+All Do/
+electro_calc/
+
+# Database
+*.db
+*.sqlite3
+data/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Media
+media/
+uploads/
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
