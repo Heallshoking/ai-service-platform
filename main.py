@@ -279,198 +279,520 @@ def calculate_platform_fee(amount: float) -> Dict[str, float]:
 
 @app.get("/")
 async def root():
-    """Главная страница - Простая форма заказа"""
+    """Главная страница - Вызов мастера в стиле baltset.ru"""
     from fastapi.responses import HTMLResponse
     
-    # 🔥 ВСТРОЕННЫЙ HTML (временное решение для Timeweb)
     html_content = """
     <!DOCTYPE html>
     <html lang="ru">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>AI Service Platform - Заказ мастера</title>
+        <title>Услуги электрика в Калининграде | Быстрый вызов мастера</title>
         <style>
             * { margin: 0; padding: 0; box-sizing: border-box; }
+            :root {
+                --primary: #1a1a1a;
+                --primary-light: #333;
+                --accent: #10b981;
+                --accent-dark: #059669;
+                --bg: #ffffff;
+                --bg-alt: #f9fafb;
+                --text: #1a1a1a;
+                --text-muted: #6b7280;
+                --border: #e5e7eb;
+                --shadow: 0 1px 3px rgba(0,0,0,0.1);
+            }
+            
             body {
                 font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                min-height: 100vh;
+                background: var(--bg);
+                color: var(--text);
+                line-height: 1.6;
+            }
+            
+            /* Header */
+            header {
+                background: rgba(255,255,255,0.95);
+                backdrop-filter: blur(10px);
+                border-bottom: 1px solid var(--border);
+                position: sticky;
+                top: 0;
+                z-index: 50;
+            }
+            
+            .header-container {
+                max-width: 1200px;
+                margin: 0 auto;
+                padding: 1rem 1.5rem;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 2rem;
+            }
+            
+            .logo {
+                display: flex;
+                align-items: center;
+                gap: 0.75rem;
+                text-decoration: none;
+                color: var(--primary);
+                font-size: 1.25rem;
+                font-weight: 700;
+            }
+            
+            .logo-icon {
+                width: 32px;
+                height: 32px;
+                background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+                border-radius: 8px;
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                padding: 1rem;
+                color: white;
+                font-size: 1.25rem;
             }
-            .container {
-                background: white;
-                border-radius: 20px;
-                padding: 2rem;
-                max-width: 500px;
-                width: 100%;
-                box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            
+            nav {
+                display: flex;
+                gap: 2rem;
             }
-            h1 {
-                color: #667eea;
-                margin-bottom: 0.5rem;
-                font-size: 2rem;
+            
+            nav a {
+                text-decoration: none;
+                color: var(--text-muted);
+                font-size: 0.95rem;
+                transition: color 0.2s;
             }
-            .subtitle {
-                color: #666;
-                margin-bottom: 2rem;
-                font-size: 0.9rem;
+            
+            nav a:hover {
+                color: var(--primary);
             }
-            .form-group {
-                margin-bottom: 1.5rem;
-            }
-            label {
-                display: block;
-                margin-bottom: 0.5rem;
-                color: #333;
-                font-weight: 600;
-            }
-            input, select, textarea {
-                width: 100%;
-                padding: 0.75rem;
-                border: 2px solid #e0e0e0;
-                border-radius: 10px;
-                font-size: 1rem;
-                transition: border-color 0.3s;
-            }
-            input:focus, select:focus, textarea:focus {
-                outline: none;
-                border-color: #667eea;
-            }
-            textarea {
-                resize: vertical;
-                min-height: 100px;
-            }
-            .btn {
-                width: 100%;
-                padding: 1rem;
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            
+            .header-btn {
+                padding: 0.625rem 1.25rem;
+                background: var(--accent);
                 color: white;
                 border: none;
-                border-radius: 10px;
-                font-size: 1.1rem;
+                border-radius: 8px;
+                font-size: 0.95rem;
                 font-weight: 600;
                 cursor: pointer;
-                transition: transform 0.2s;
-            }
-            .btn:hover {
-                transform: translateY(-2px);
-            }
-            .btn:active {
-                transform: translateY(0);
-            }
-            .links {
-                margin-top: 1.5rem;
-                padding-top: 1.5rem;
-                border-top: 1px solid #e0e0e0;
-                display: flex;
-                justify-content: space-around;
-            }
-            .links a {
-                color: #667eea;
+                transition: all 0.2s;
                 text-decoration: none;
-                font-size: 0.9rem;
+                display: inline-block;
             }
-            .success {
-                background: #10b981;
-                color: white;
-                padding: 1rem;
-                border-radius: 10px;
+            
+            .header-btn:hover {
+                background: var(--accent-dark);
+                transform: translateY(-1px);
+            }
+            
+            /* Hero Section */
+            .hero {
+                background: linear-gradient(135deg, #f9fafb 0%, #e5e7eb 100%);
+                padding: 4rem 1.5rem;
+                position: relative;
+                overflow: hidden;
+            }
+            
+            .hero::before {
+                content: '';
+                position: absolute;
+                right: -5%;
+                top: -10%;
+                width: 400px;
+                height: 400px;
+                border-radius: 50%;
+                border: 8px solid rgba(16, 185, 129, 0.1);
+            }
+            
+            .hero-container {
+                max-width: 1200px;
+                margin: 0 auto;
+                text-align: center;
+                position: relative;
+                z-index: 1;
+            }
+            
+            .hero-badge {
+                display: inline-flex;
+                align-items: center;
+                gap: 0.5rem;
+                padding: 0.5rem 1rem;
+                background: rgba(16, 185, 129, 0.1);
+                border-radius: 100px;
+                color: var(--accent);
+                font-size: 0.875rem;
+                font-weight: 600;
+                margin-bottom: 1.5rem;
+            }
+            
+            h1 {
+                font-size: clamp(2rem, 5vw, 3.5rem);
+                font-weight: 800;
                 margin-bottom: 1rem;
-                display: none;
+                line-height: 1.2;
+            }
+            
+            .hero h1 span {
+                color: var(--accent);
+                display: block;
+            }
+            
+            .hero-subtitle {
+                font-size: 1.125rem;
+                color: var(--text-muted);
+                max-width: 600px;
+                margin: 0 auto 2rem;
+            }
+            
+            .hero-actions {
+                display: flex;
+                gap: 1rem;
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+            
+            .btn {
+                padding: 1rem 2rem;
+                border-radius: 10px;
+                font-size: 1rem;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.2s;
+                border: none;
+                text-decoration: none;
+                display: inline-flex;
+                align-items: center;
+                gap: 0.5rem;
+            }
+            
+            .btn-primary {
+                background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+                color: white;
+                box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);
+            }
+            
+            .btn-primary:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+            }
+            
+            .btn-outline {
+                background: white;
+                color: var(--primary);
+                border: 2px solid var(--border);
+            }
+            
+            .btn-outline:hover {
+                border-color: var(--accent);
+                color: var(--accent);
+            }
+            
+            /* Services Section */
+            .services {
+                padding: 4rem 1.5rem;
+            }
+            
+            .container {
+                max-width: 1200px;
+                margin: 0 auto;
+            }
+            
+            .section-header {
+                text-align: center;
+                margin-bottom: 3rem;
+            }
+            
+            .section-badge {
+                color: var(--accent);
+                font-weight: 600;
+                font-size: 0.875rem;
+                text-transform: uppercase;
+                letter-spacing: 0.05em;
+                margin-bottom: 0.5rem;
+            }
+            
+            .section-title {
+                font-size: 2.5rem;
+                font-weight: 800;
+                margin-bottom: 0.75rem;
+            }
+            
+            .section-subtitle {
+                color: var(--text-muted);
+                font-size: 1.125rem;
+            }
+            
+            .services-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+                gap: 1.5rem;
+            }
+            
+            .service-card {
+                background: white;
+                border: 1px solid var(--border);
+                border-radius: 16px;
+                padding: 2rem;
+                transition: all 0.3s;
+                cursor: pointer;
+            }
+            
+            .service-card:hover {
+                transform: translateY(-4px);
+                box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+                border-color: var(--accent);
+            }
+            
+            .service-icon {
+                width: 60px;
+                height: 60px;
+                background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.1));
+                border-radius: 12px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 2rem;
+                margin-bottom: 1.5rem;
+            }
+            
+            .service-card h3 {
+                font-size: 1.25rem;
+                font-weight: 700;
+                margin-bottom: 0.5rem;
+            }
+            
+            .service-card p {
+                color: var(--text-muted);
+                font-size: 0.95rem;
+                line-height: 1.6;
+            }
+            
+            /* How it works */
+            .how-it-works {
+                padding: 4rem 1.5rem;
+                background: var(--bg-alt);
+            }
+            
+            .steps {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                gap: 2rem;
+                margin-top: 3rem;
+            }
+            
+            .step {
+                text-align: center;
+            }
+            
+            .step-number {
+                width: 60px;
+                height: 60px;
+                background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+                color: white;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 1.5rem;
+                font-weight: 700;
+                margin: 0 auto 1.5rem;
+            }
+            
+            .step h3 {
+                font-size: 1.125rem;
+                margin-bottom: 0.5rem;
+            }
+            
+            .step p {
+                color: var(--text-muted);
+                font-size: 0.95rem;
+            }
+            
+            /* CTA Section */
+            .cta {
+                padding: 4rem 1.5rem;
+                background: linear-gradient(135deg, var(--primary), var(--primary-light));
+                color: white;
+                text-align: center;
+            }
+            
+            .cta h2 {
+                font-size: 2.5rem;
+                margin-bottom: 1rem;
+            }
+            
+            .cta p {
+                font-size: 1.125rem;
+                opacity: 0.9;
+                margin-bottom: 2rem;
+            }
+            
+            .cta .btn-primary {
+                background: white;
+                color: var(--primary);
+            }
+            
+            .cta .btn-primary:hover {
+                background: var(--bg-alt);
+            }
+            
+            /* Footer */
+            footer {
+                padding: 2rem 1.5rem;
+                background: var(--bg-alt);
+                border-top: 1px solid var(--border);
+                text-align: center;
+                color: var(--text-muted);
+                font-size: 0.875rem;
+            }
+            
+            @media (max-width: 768px) {
+                nav { display: none; }
+                .hero-actions { flex-direction: column; }
+                .btn { width: 100%; justify-content: center; }
             }
         </style>
     </head>
     <body>
-        <div class="container">
-            <h1>🔧 Вызов мастера</h1>
-            <p class="subtitle">Заполните форму, и мы найдём специалиста</p>
-            
-            <div id="successMessage" class="success"></div>
-            
-            <form id="orderForm">
-                <div class="form-group">
-                    <label>👤 Ваше имя</label>
-                    <input type="text" name="name" required>
-                </div>
-                
-                <div class="form-group">
-                    <label>📱 Телефон</label>
-                    <input type="tel" name="phone" placeholder="+7 (900) 123-45-67" required>
-                </div>
-                
-                <div class="form-group">
-                    <label>🔧 Категория услуги</label>
-                    <select name="category" required>
-                        <option value="">Выберите...</option>
-                        <option value="electrical">⚡ Электрика</option>
-                        <option value="plumbing">🚰 Сантехника</option>
-                        <option value="appliance">🔌 Бытовая техника</option>
-                        <option value="general">🔨 Общие работы</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label>📍 Адрес</label>
-                    <input type="text" name="address" required>
-                </div>
-                
-                <div class="form-group">
-                    <label>📝 Описание проблемы</label>
-                    <textarea name="problem_description" required></textarea>
-                </div>
-                
-                <button type="submit" class="btn">✨ Оформить заказ</button>
-            </form>
-            
-            <div class="links">
-                <a href="/docs">📚 API Docs</a>
-                <a href="/admin">⚙️ Админка</a>
-                <a href="/master">👨‍🔧 Мастер</a>
+        <!-- Header -->
+        <header>
+            <div class="header-container">
+                <a href="/" class="logo">
+                    <div class="logo-icon">⚡</div>
+                    <span>Услуги Мастера</span>
+                </a>
+                <nav>
+                    <a href="#services">Услуги</a>
+                    <a href="#how-it-works">Как работает</a>
+                    <a href="/docs">API</a>
+                </nav>
+                <a href="/admin" class="header-btn">Админ</a>
             </div>
-        </div>
-        
+        </header>
+
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="hero-container">
+                <div class="hero-badge">
+                    ⚡ Быстрая помощь в Калининграде
+                </div>
+                <h1>
+                    Вызов мастера
+                    <span>онлайн за 2 минуты</span>
+                </h1>
+                <p class="hero-subtitle">
+                    Электрики, сантехники, мастера по бытовой технике. Прозрачные цены, гарантия качества.
+                </p>
+                <div class="hero-actions">
+                    <button class="btn btn-primary" onclick="scrollToServices()">
+                        🔧 Выбрать услугу
+                    </button>
+                    <a href="/master" class="btn btn-outline">
+                        👨‍🔧 Для мастеров
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Services Section -->
+        <section class="services" id="services">
+            <div class="container">
+                <div class="section-header">
+                    <div class="section-badge">Услуги</div>
+                    <h2 class="section-title">Что мы предлагаем</h2>
+                    <p class="section-subtitle">Широкий спектр услуг для дома и офиса</p>
+                </div>
+                <div class="services-grid">
+                    <div class="service-card" onclick="openOrderForm('electrical')">
+                        <div class="service-icon">⚡</div>
+                        <h3>Электрика</h3>
+                        <p>Замена розеток, выключателей, монтаж освещения, электропроводка</p>
+                    </div>
+                    <div class="service-card" onclick="openOrderForm('plumbing')">
+                        <div class="service-icon">🚰</div>
+                        <h3>Сантехника</h3>
+                        <p>Ремонт кранов, установка сантехники, прочистка труб</p>
+                    </div>
+                    <div class="service-card" onclick="openOrderForm('appliance')">
+                        <div class="service-icon">🔌</div>
+                        <h3>Бытовая техника</h3>
+                        <p>Ремонт холодильников, стиральных машин, микроволновок</p>
+                    </div>
+                    <div class="service-card" onclick="openOrderForm('general')">
+                        <div class="service-icon">🔨</div>
+                        <h3>Общие работы</h3>
+                        <p>Мелкий ремонт, сборка мебели, навес полок</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- How it Works -->
+        <section class="how-it-works" id="how-it-works">
+            <div class="container">
+                <div class="section-header">
+                    <div class="section-badge">Процесс</div>
+                    <h2 class="section-title">Как это работает</h2>
+                    <p class="section-subtitle">Простые шаги до выполненной работы</p>
+                </div>
+                <div class="steps">
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <h3>Оставьте заявку</h3>
+                        <p>Выберите услугу и опишите проблему</p>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <h3>Получите оценку</h3>
+                        <p>Автоматический расчёт стоимости</p>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <h3>Мастер выезжает</h3>
+                        <p>Опытный специалист приедет в удобное время</p>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">4</div>
+                        <h3>Готово!</h3>
+                        <p>Оплата после выполнения работы</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA -->
+        <section class="cta">
+            <div class="container">
+                <h2>Готовы вызвать мастера?</h2>
+                <p>Начните прямо сейчас — это займёт всего 2 минуты</p>
+                <button class="btn btn-primary" onclick="scrollToServices()">
+                    ✨ Оформить заказ
+                </button>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer>
+            <p>&copy; 2025 Услуги Мастера. Все права защищены.</p>
+            <p style="margin-top: 0.5rem;">
+                <a href="/docs" style="color: var(--accent); text-decoration: none;">API Документация</a> • 
+                <a href="/admin" style="color: var(--accent); text-decoration: none;">Админ-панель</a> • 
+                <a href="/master" style="color: var(--accent); text-decoration: none;">Для мастеров</a>
+            </p>
+        </footer>
+
         <script>
-            const form = document.getElementById('orderForm');
-            const success = document.getElementById('successMessage');
+            function scrollToServices() {
+                document.getElementById('services').scrollIntoView({ behavior: 'smooth' });
+            }
             
-            form.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                
-                const formData = new FormData(form);
-                const data = {
-                    name: formData.get('name'),
-                    phone: formData.get('phone'),
-                    category: formData.get('category'),
-                    problem_description: formData.get('problem_description'),
-                    address: formData.get('address')
-                };
-                
-                try {
-                    const response = await fetch('/api/v1/ai/web-form', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(data)
-                    });
-                    
-                    const result = await response.json();
-                    
-                    if (response.ok) {
-                        success.style.display = 'block';
-                        success.textContent = `✅ Заказ #${result.job_id} принят! Примерная стоимость: ${result.estimated_price}₽`;
-                        form.reset();
-                        
-                        setTimeout(() => {
-                            success.style.display = 'none';
-                        }, 5000);
-                    }
-                } catch (error) {
-                    alert('❌ Ошибка отправки. Попробуйте позже.');
-                }
-            });
+            function openOrderForm(category) {
+                // Редирект на страницу заказа с категорией
+                window.location.href = `/order?category=${category}`;
+            }
         </script>
     </body>
     </html>
@@ -486,65 +808,563 @@ async def form_page():
         raise HTTPException(status_code=500, detail=f"HTML file not found: {html_path.absolute()}")
     return FileResponse(html_path)
 
-@app.get("/admin")
-async def admin_panel():
-    """Админ-панель"""
+@app.get("/order")
+async def order_page(category: str = "electrical"):
+    """Страница оформления заказа"""
     from fastapi.responses import HTMLResponse
-    return HTMLResponse(content="""
+    
+    categories_ru = {
+        "electrical": "Электрика",
+        "plumbing": "Сантехника",
+        "appliance": "Бытовая техника",
+        "general": "Общие работы"
+    }
+    
+    html_content = f"""
     <!DOCTYPE html>
     <html lang="ru">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Админ-панель</title>
+        <title>Заказ мастера - {categories_ru.get(category, "Услуга")}</title>
         <style>
-            * { margin: 0; padding: 0; box-sizing: border-box; }
-            body {
-                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-                background: #f5f5f5;
-                padding: 2rem;
-            }
-            .container { max-width: 1200px; margin: 0 auto; }
-            h1 { color: #333; margin-bottom: 2rem; }
-            .card {
+            * {{ margin: 0; padding: 0; box-sizing: border-box; }}
+            :root {{
+                --primary: #1a1a1a;
+                --accent: #10b981;
+                --accent-dark: #059669;
+                --bg: #ffffff;
+                --bg-alt: #f9fafb;
+                --text: #1a1a1a;
+                --text-muted: #6b7280;
+                --border: #e5e7eb;
+            }}
+            
+            body {{
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                background: var(--bg-alt);
+                color: var(--text);
+                line-height: 1.6;
+                padding: 2rem 1rem;
+            }}
+            
+            .container {{
+                max-width: 600px;
+                margin: 0 auto;
                 background: white;
-                border-radius: 10px;
-                padding: 1.5rem;
-                margin-bottom: 1rem;
-                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            }
-            .btn {
-                display: inline-block;
-                padding: 0.75rem 1.5rem;
-                background: #667eea;
-                color: white;
+                border-radius: 20px;
+                padding: 2.5rem;
+                box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            }}
+            
+            .back-btn {{
+                display: inline-flex;
+                align-items: center;
+                gap: 0.5rem;
+                color: var(--text-muted);
                 text-decoration: none;
-                border-radius: 8px;
-                margin-right: 1rem;
-            }
+                margin-bottom: 1.5rem;
+                font-size: 0.9rem;
+                transition: color 0.2s;
+            }}
+            
+            .back-btn:hover {{
+                color: var(--primary);
+            }}
+            
+            h1 {{
+                font-size: 2rem;
+                margin-bottom: 0.5rem;
+                color: var(--primary);
+            }}
+            
+            .subtitle {{
+                color: var(--text-muted);
+                margin-bottom: 2rem;
+                font-size: 1rem;
+            }}
+            
+            .category-badge {{
+                display: inline-block;
+                padding: 0.5rem 1rem;
+                background: rgba(16, 185, 129, 0.1);
+                color: var(--accent);
+                border-radius: 100px;
+                font-weight: 600;
+                font-size: 0.9rem;
+                margin-bottom: 2rem;
+            }}
+            
+            .form-group {{
+                margin-bottom: 1.5rem;
+            }}
+            
+            label {{
+                display: block;
+                margin-bottom: 0.5rem;
+                color: var(--primary);
+                font-weight: 600;
+                font-size: 0.95rem;
+            }}
+            
+            .required {{
+                color: #ef4444;
+            }}
+            
+            input, select, textarea {{
+                width: 100%;
+                padding: 0.875rem;
+                border: 2px solid var(--border);
+                border-radius: 10px;
+                font-size: 1rem;
+                transition: all 0.2s;
+                font-family: inherit;
+            }}
+            
+            input:focus, select:focus, textarea:focus {{
+                outline: none;
+                border-color: var(--accent);
+                box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+            }}
+            
+            textarea {{
+                resize: vertical;
+                min-height: 120px;
+            }}
+            
+            .btn {{
+                width: 100%;
+                padding: 1rem;
+                background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+                color: white;
+                border: none;
+                border-radius: 10px;
+                font-size: 1.1rem;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.2s;
+                margin-top: 1rem;
+            }}
+            
+            .btn:hover {{
+                transform: translateY(-2px);
+                box-shadow: 0 6px 20px rgba(16, 185, 129, 0.3);
+            }}
+            
+            .btn:active {{
+                transform: translateY(0);
+            }}
+            
+            .success {{
+                background: linear-gradient(135deg, #10b981, #059669);
+                color: white;
+                padding: 1.5rem;
+                border-radius: 12px;
+                margin-bottom: 1.5rem;
+                display: none;
+            }}
+            
+            .success h3 {{
+                margin-bottom: 0.5rem;
+                font-size: 1.25rem;
+            }}
+            
+            .success p {{
+                opacity: 0.95;
+                font-size: 0.95rem;
+            }}
+            
+            .price-estimate {{
+                background: var(--bg-alt);
+                padding: 1.25rem;
+                border-radius: 12px;
+                margin-bottom: 1.5rem;
+                border-left: 4px solid var(--accent);
+                display: none;
+            }}
+            
+            .price-estimate h4 {{
+                color: var(--primary);
+                margin-bottom: 0.5rem;
+            }}
+            
+            .price-estimate .price {{
+                font-size: 2rem;
+                font-weight: 700;
+                color: var(--accent);
+            }}
+            
+            @media (max-width: 640px) {{
+                .container {{
+                    padding: 1.5rem;
+                }}
+                h1 {{
+                    font-size: 1.5rem;
+                }}
+            }}
         </style>
     </head>
     <body>
         <div class="container">
-            <h1>⚙️ Админ-панель</h1>
-            <div class="card">
-                <h2>📊 Статистика</h2>
-                <p>Здесь будет статистика заказов и мастеров</p>
+            <a href="/" class="back-btn">← Назад</a>
+            
+            <div class="category-badge">{categories_ru.get(category, "Услуга")}</div>
+            
+            <h1>Оформление заказа</h1>
+            <p class="subtitle">Заполните форму, и мы найдём лучшего мастера</p>
+            
+            <div id="successMessage" class="success">
+                <h3>✅ Заказ принят!</h3>
+                <p id="orderDetails"></p>
             </div>
-            <div class="card">
-                <a href="/docs" class="btn">📚 API Документация</a>
-                <a href="/" class="btn">← На главную</a>
+            
+            <div id="priceEstimate" class="price-estimate">
+                <h4>Примерная стоимость:</h4>
+                <div class="price" id="estimatedPrice">0 ₽</div>
             </div>
+            
+            <form id="orderForm">
+                <input type="hidden" name="category" value="{category}">
+                
+                <div class="form-group">
+                    <label>👤 Ваше имя <span class="required">*</span></label>
+                    <input type="text" name="name" required placeholder="Иван Иванов">
+                </div>
+                
+                <div class="form-group">
+                    <label>📱 Телефон <span class="required">*</span></label>
+                    <input type="tel" name="phone" required placeholder="+7 (900) 123-45-67">
+                </div>
+                
+                <div class="form-group">
+                    <label>📍 Адрес <span class="required">*</span></label>
+                    <input type="text" name="address" required placeholder="ул. Пушкина, д. 10, кв. 5">
+                </div>
+                
+                <div class="form-group">
+                    <label>📝 Описание проблемы <span class="required">*</span></label>
+                    <textarea name="problem_description" required placeholder="Опишите что нужно сделать..."></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label>🗓️ Желаемая дата и время</label>
+                    <input type="datetime-local" name="preferred_time">
+                </div>
+                
+                <button type="submit" class="btn">✨ Оформить заказ</button>
+            </form>
         </div>
+        
+        <script>
+            const form = document.getElementById('orderForm');
+            const success = document.getElementById('successMessage');
+            const priceEstimate = document.getElementById('priceEstimate');
+            const orderDetails = document.getElementById('orderDetails');
+            const estimatedPrice = document.getElementById('estimatedPrice');
+            
+            form.addEventListener('submit', async (e) => {{
+                e.preventDefault();
+                
+                const formData = new FormData(form);
+                const data = {{
+                    name: formData.get('name'),
+                    phone: formData.get('phone'),
+                    category: formData.get('category'),
+                    problem_description: formData.get('problem_description'),
+                    address: formData.get('address'),
+                    preferred_time: formData.get('preferred_time') || null
+                }};
+                
+                try {{
+                    const response = await fetch('/api/v1/ai/web-form', {{
+                        method: 'POST',
+                        headers: {{ 'Content-Type': 'application/json' }},
+                        body: JSON.stringify(data)
+                    }});
+                    
+                    const result = await response.json();
+                    
+                    if (response.ok) {{
+                        // Показываем успех
+                        success.style.display = 'block';
+                        priceEstimate.style.display = 'block';
+                        
+                        orderDetails.textContent = `Заказ #${{result.job_id}} принят в обработку. Мастер свяжется с вами в ближайшее время.`;
+                        estimatedPrice.textContent = `${{result.estimated_price}} ₽`;
+                        
+                        form.reset();
+                        
+                        // Прокручиваем к сообщению
+                        success.scrollIntoView({{ behavior: 'smooth', block: 'center' }});
+                        
+                        // Через 5 секунд редирект на главную
+                        setTimeout(() => {{
+                            window.location.href = '/';
+                        }}, 5000);
+                    }}
+                }} catch (error) {{
+                    alert('❌ Ошибка отправки. Проверьте интернет-соединение.');
+                }}
+            }});
+        </script>
     </body>
     </html>
-    """)
+    """
+    
+    return HTMLResponse(content=html_content)
+
+
+@app.get("/admin")
+async def admin_panel():
+    """Админ-панель - управление заказами и мастерами"""
+    from fastapi.responses import HTMLResponse
+    
+    html_content = """
+    <!DOCTYPE html>
+    <html lang="ru">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Админ-панель | Управление платформой</title>
+        <style>
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            :root {
+                --primary: #1a1a1a;
+                --accent: #10b981;
+                --accent-dark: #059669;
+                --bg: #f9fafb;
+                --text: #1a1a1a;
+                --text-muted: #6b7280;
+                --border: #e5e7eb;
+            }
+            
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                background: var(--bg);
+                color: var(--text);
+                line-height: 1.6;
+            }
+            
+            header {
+                background: white;
+                border-bottom: 1px solid var(--border);
+                padding: 1.5rem;
+            }
+            
+            .header-content {
+                max-width: 1400px;
+                margin: 0 auto;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+            
+            .logo {
+                font-size: 1.5rem;
+                font-weight: 700;
+                color: var(--primary);
+            }
+            
+            .nav-links {
+                display: flex;
+                gap: 1.5rem;
+            }
+            
+            .nav-links a {
+                color: var(--text-muted);
+                text-decoration: none;
+                transition: color 0.2s;
+            }
+            
+            .nav-links a:hover {
+                color: var(--accent);
+            }
+            
+            .container {
+                max-width: 1400px;
+                margin: 0 auto;
+                padding: 2rem 1.5rem;
+            }
+            
+            h1 {
+                font-size: 2rem;
+                margin-bottom: 0.5rem;
+            }
+            
+            .subtitle {
+                color: var(--text-muted);
+                margin-bottom: 2rem;
+            }
+            
+            .stats-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                gap: 1.5rem;
+                margin-bottom: 2rem;
+            }
+            
+            .stat-card {
+                background: white;
+                border-radius: 12px;
+                padding: 1.5rem;
+                border: 1px solid var(--border);
+            }
+            
+            .stat-card h3 {
+                color: var(--text-muted);
+                font-size: 0.875rem;
+                text-transform: uppercase;
+                letter-spacing: 0.05em;
+                margin-bottom: 0.75rem;
+            }
+            
+            .stat-value {
+                font-size: 2.5rem;
+                font-weight: 700;
+                color: var(--accent);
+            }
+            
+            .card {
+                background: white;
+                border-radius: 12px;
+                padding: 2rem;
+                border: 1px solid var(--border);
+                margin-bottom: 1.5rem;
+            }
+            
+            .card h2 {
+                font-size: 1.5rem;
+                margin-bottom: 1.5rem;
+            }
+            
+            .api-links {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                gap: 1rem;
+            }
+            
+            .api-link {
+                display: block;
+                padding: 1rem 1.5rem;
+                background: var(--bg);
+                border-radius: 8px;
+                text-decoration: none;
+                color: var(--text);
+                transition: all 0.2s;
+                border: 1px solid var(--border);
+            }
+            
+            .api-link:hover {
+                border-color: var(--accent);
+                background: white;
+            }
+            
+            .api-link strong {
+                color: var(--accent);
+                display: block;
+                margin-bottom: 0.25rem;
+            }
+            
+            .api-link span {
+                font-size: 0.875rem;
+                color: var(--text-muted);
+            }
+        </style>
+    </head>
+    <body>
+        <header>
+            <div class="header-content">
+                <div class="logo">⚙️ Админ-панель</div>
+                <nav class="nav-links">
+                    <a href="/">Главная</a>
+                    <a href="/docs">API Docs</a>
+                    <a href="/master">Мастера</a>
+                </nav>
+            </div>
+        </header>
+        
+        <div class="container">
+            <h1>Панель управления</h1>
+            <p class="subtitle">Статистика, заказы и мастера</p>
+            
+            <!-- Статистика -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>📊 Всего заказов</h3>
+                    <div class="stat-value" id="totalJobs">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>✅ Выполнено</h3>
+                    <div class="stat-value" id="completedJobs">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>👨‍🔧 Активных мастеров</h3>
+                    <div class="stat-value" id="activeMasters">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>💰 Доход</h3>
+                    <div class="stat-value" id="revenue">0 ₽</div>
+                </div>
+            </div>
+            
+            <!-- API Эндпоинты -->
+            <div class="card">
+                <h2>🔌 API Эндпоинты</h2>
+                <div class="api-links">
+                    <a href="/docs" class="api-link">
+                        <strong>📚 Swagger UI</strong>
+                        <span>Интерактивная документация API</span>
+                    </a>
+                    <a href="/api/v1/jobs" class="api-link">
+                        <strong>📝 GET /api/v1/jobs</strong>
+                        <span>Список всех заказов</span>
+                    </a>
+                    <a href="/api/v1/masters" class="api-link">
+                        <strong>👨‍🔧 GET /api/v1/masters</strong>
+                        <span>Список всех мастеров</span>
+                    </a>
+                    <a href="/api/v1/stats" class="api-link">
+                        <strong>📊 GET /api/v1/stats</strong>
+                        <span>Общая статистика платформы</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <script>
+            // Загрузка статистики
+            async function loadStats() {
+                try {
+                    const response = await fetch('/api/v1/stats');
+                    const stats = await response.json();
+                    
+                    document.getElementById('totalJobs').textContent = stats.total_jobs || 0;
+                    document.getElementById('completedJobs').textContent = stats.completed_jobs || 0;
+                    document.getElementById('activeMasters').textContent = stats.active_masters || 0;
+                    document.getElementById('revenue').textContent = (stats.total_revenue || 0) + ' ₽';
+                } catch (error) {
+                    console.error('Ошибка загрузки статистики:', error);
+                }
+            }
+            
+            // Загрузка данных при загрузке страницы
+            loadStats();
+            
+            // Обновление каждые 30 секунд
+            setInterval(loadStats, 30000);
+        </script>
+    </body>
+    </html>
+    """
+    
+    return HTMLResponse(content=html_content)
 
 @app.get("/master")
 async def master_dashboard():
     """Личный кабинет мастера"""
     from fastapi.responses import HTMLResponse
-    return HTMLResponse(content="""
+    
+    html_content = """
     <!DOCTYPE html>
     <html lang="ru">
     <head>
@@ -553,45 +1373,333 @@ async def master_dashboard():
         <title>Личный кабинет мастера</title>
         <style>
             * { margin: 0; padding: 0; box-sizing: border-box; }
+            :root {
+                --primary: #1a1a1a;
+                --accent: #10b981;
+                --accent-dark: #059669;
+                --bg: #f9fafb;
+                --text: #1a1a1a;
+                --text-muted: #6b7280;
+                --border: #e5e7eb;
+            }
+            
             body {
-                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                min-height: 100vh;
-                padding: 2rem;
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                background: var(--bg);
+                color: var(--text);
+                line-height: 1.6;
             }
-            .container {
-                max-width: 800px;
-                margin: 0 auto;
+            
+            header {
                 background: white;
-                border-radius: 20px;
-                padding: 2rem;
+                border-bottom: 1px solid var(--border);
+                padding: 1.5rem;
             }
-            h1 { color: #667eea; margin-bottom: 2rem; }
-            .info { background: #f0f0f0; padding: 1rem; border-radius: 10px; margin-bottom: 1rem; }
-            .btn {
-                display: inline-block;
-                padding: 0.75rem 1.5rem;
-                background: #667eea;
-                color: white;
+            
+            .header-content {
+                max-width: 1400px;
+                margin: 0 auto;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+            
+            .logo {
+                font-size: 1.5rem;
+                font-weight: 700;
+                color: var(--primary);
+            }
+            
+            .nav-links {
+                display: flex;
+                gap: 1.5rem;
+            }
+            
+            .nav-links a {
+                color: var(--text-muted);
                 text-decoration: none;
+                transition: color 0.2s;
+            }
+            
+            .nav-links a:hover {
+                color: var(--accent);
+            }
+            
+            .container {
+                max-width: 1400px;
+                margin: 0 auto;
+                padding: 2rem 1.5rem;
+            }
+            
+            h1 {
+                font-size: 2rem;
+                margin-bottom: 0.5rem;
+            }
+            
+            .subtitle {
+                color: var(--text-muted);
+                margin-bottom: 2rem;
+            }
+            
+            .stats-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 1.5rem;
+                margin-bottom: 2rem;
+            }
+            
+            .stat-card {
+                background: white;
+                border-radius: 12px;
+                padding: 1.5rem;
+                border: 1px solid var(--border);
+            }
+            
+            .stat-card h3 {
+                color: var(--text-muted);
+                font-size: 0.875rem;
+                text-transform: uppercase;
+                letter-spacing: 0.05em;
+                margin-bottom: 0.75rem;
+            }
+            
+            .stat-value {
+                font-size: 2rem;
+                font-weight: 700;
+                color: var(--accent);
+            }
+            
+            .card {
+                background: white;
+                border-radius: 12px;
+                padding: 2rem;
+                border: 1px solid var(--border);
+                margin-bottom: 1.5rem;
+            }
+            
+            .card h2 {
+                font-size: 1.5rem;
+                margin-bottom: 1.5rem;
+            }
+            
+            .job-item {
+                padding: 1rem;
+                border: 1px solid var(--border);
                 border-radius: 8px;
-                margin-right: 1rem;
+                margin-bottom: 1rem;
+            }
+            
+            .job-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 0.75rem;
+            }
+            
+            .job-id {
+                font-weight: 700;
+                color: var(--accent);
+            }
+            
+            .status {
+                display: inline-block;
+                padding: 0.25rem 0.75rem;
+                border-radius: 100px;
+                font-size: 0.875rem;
+                font-weight: 600;
+            }
+            
+            .status-pending {
+                background: #fef3c7;
+                color: #92400e;
+            }
+            
+            .status-active {
+                background: #d1fae5;
+                color: #065f46;
+            }
+            
+            .btn {
+                padding: 0.5rem 1rem;
+                border-radius: 8px;
+                border: none;
+                cursor: pointer;
+                font-weight: 600;
+                transition: all 0.2s;
+                text-decoration: none;
+                display: inline-block;
+            }
+            
+            .btn-primary {
+                background: var(--accent);
+                color: white;
+            }
+            
+            .btn-primary:hover {
+                background: var(--accent-dark);
+            }
+            
+            .info-box {
+                background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.05));
+                padding: 1.5rem;
+                border-radius: 12px;
+                border-left: 4px solid var(--accent);
+            }
+            
+            .info-box h3 {
+                margin-bottom: 0.75rem;
+                color: var(--primary);
+            }
+            
+            .info-box ul {
+                list-style: none;
+                padding: 0;
+            }
+            
+            .info-box li {
+                padding: 0.5rem 0;
+                color: var(--text-muted);
             }
         </style>
     </head>
     <body>
-        <div class="container">
-            <h1>👨‍🔧 Личный кабинет мастера</h1>
-            <div class="info">
-                <p>📍 Здесь будут ваши заказы и статистика</p>
-                <p>📊 Интеграция с Google Calendar и Tasks</p>
+        <header>
+            <div class="header-content">
+                <div class="logo">👨‍🔧 Кабинет Мастера</div>
+                <nav class="nav-links">
+                    <a href="/">Главная</a>
+                    <a href="/docs">API Docs</a>
+                    <a href="/admin">Админ</a>
+                </nav>
             </div>
-            <a href="/docs" class="btn">📚 API Документация</a>
-            <a href="/" class="btn">← На главную</a>
+        </header>
+        
+        <div class="container">
+            <h1>Личный кабинет</h1>
+            <p class="subtitle">Ваши заказы и статистика</p>
+            
+            <!-- Статистика -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>📊 Всего заказов</h3>
+                    <div class="stat-value" id="totalJobs">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>✅ Выполнено</h3>
+                    <div class="stat-value" id="completedJobs">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>💰 Заработано</h3>
+                    <div class="stat-value" id="earnings">0 ₽</div>
+                </div>
+                <div class="stat-card">
+                    <h3>⭐ Рейтинг</h3>
+                    <div class="stat-value" id="rating">5.0</div>
+                </div>
+            </div>
+            
+            <!-- Текущие заказы -->
+            <div class="card">
+                <h2>📝 Текущие заказы</h2>
+                <div id="jobsList">
+                    <p style="color: var(--text-muted); text-align: center; padding: 2rem;">
+                        Загрузка заказов...
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Интеграции -->
+            <div class="card">
+                <h2>🔌 Интеграции</h2>
+                <div class="info-box">
+                    <h3>✨ Доступные интеграции</h3>
+                    <ul>
+                        <li>📅 <strong>Google Calendar</strong> - Синхронизация заказов с календарём</li>
+                        <li>☑️ <strong>Google Tasks</strong> - Мобильный виджет для Android</li>
+                        <li>📧 <strong>Telegram Mini App</strong> - Доступ через бота</li>
+                        <li>📊 <strong>API</strong> - Полный доступ к данным</li>
+                    </ul>
+                </div>
+            </div>
         </div>
+        
+        <script>
+            // Загрузка статистики мастера
+            async function loadMasterStats() {
+                try {
+                    // TODO: Заменить на реальный telegram_id
+                    const masterId = '1668456209'; // Пример
+                    const response = await fetch(`/api/v1/masters/${masterId}`);
+                    
+                    if (response.ok) {
+                        const master = await response.json();
+                        document.getElementById('totalJobs').textContent = master.total_jobs || 0;
+                        document.getElementById('completedJobs').textContent = master.completed_jobs || 0;
+                        document.getElementById('earnings').textContent = (master.total_earnings || 0) + ' ₽';
+                        document.getElementById('rating').textContent = (master.rating || 5.0).toFixed(1);
+                    }
+                } catch (error) {
+                    console.error('Ошибка загрузки статистики:', error);
+                }
+            }
+            
+            // Загрузка заказов
+            async function loadJobs() {
+                try {
+                    const response = await fetch('/api/v1/jobs?status=pending,assigned,in_progress');
+                    const jobs = await response.json();
+                    
+                    const jobsList = document.getElementById('jobsList');
+                    
+                    if (jobs.length === 0) {
+                        jobsList.innerHTML = '<p style="color: var(--text-muted); text-align: center; padding: 2rem;">Нет текущих заказов</p>';
+                        return;
+                    }
+                    
+                    jobsList.innerHTML = jobs.map(job => `
+                        <div class="job-item">
+                            <div class="job-header">
+                                <span class="job-id">#${job.job_id}</span>
+                                <span class="status status-${job.status}">${getStatusText(job.status)}</span>
+                            </div>
+                            <p><strong>${job.category || 'Общие работы'}</strong></p>
+                            <p>${job.problem_description || 'Нет описания'}</p>
+                            <p style="color: var(--text-muted); font-size: 0.875rem; margin-top: 0.5rem;">
+                                📍 ${job.address || 'Адрес не указан'}
+                            </p>
+                            <p style="margin-top: 0.5rem;"><strong>${job.estimated_price || 0} ₽</strong></p>
+                        </div>
+                    `).join('');
+                } catch (error) {
+                    console.error('Ошибка загрузки заказов:', error);
+                }
+            }
+            
+            function getStatusText(status) {
+                const statuses = {
+                    'pending': 'Ожидает',
+                    'assigned': 'Назначен',
+                    'in_progress': 'В работе',
+                    'completed': 'Выполнен'
+                };
+                return statuses[status] || status;
+            }
+            
+            // Загрузка данных
+            loadMasterStats();
+            loadJobs();
+            
+            // Обновление каждые 30 секунд
+            setInterval(() => {
+                loadMasterStats();
+                loadJobs();
+            }, 30000);
+        </script>
     </body>
     </html>
-    """)
+    """
+    
+    return HTMLResponse(content=html_content)
 
 @app.get("/track")
 async def track_master():
