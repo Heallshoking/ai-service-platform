@@ -14,10 +14,6 @@ import json
 import sqlite3
 from pathlib import Path
 
-# Базовая директория проекта
-BASE_DIR = Path(__file__).resolve().parent
-STATIC_DIR = BASE_DIR / "static"
-
 # Google интеграция
 try:
     from google_sync import init_google_integration, sync_order_to_google
@@ -132,7 +128,7 @@ app.add_middleware(
 )
 
 # Static files
-app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # Инициализация БД при старте
 @app.on_event("startup")
@@ -254,27 +250,27 @@ def calculate_platform_fee(amount: float) -> Dict[str, float]:
 @app.get("/")
 async def root():
     """Главная страница - AI чат для клиентов"""
-    return FileResponse(STATIC_DIR / "ai-chat.html")
+    return FileResponse("static/ai-chat.html")
 
 @app.get("/form")
 async def form_page():
     """Простая форма для клиентов"""
-    return FileResponse(STATIC_DIR / "index.html")
+    return FileResponse("static/index.html")
 
 @app.get("/admin")
 async def admin_panel():
     """Админ-панель"""
-    return FileResponse(STATIC_DIR / "admin.html")
+    return FileResponse("static/admin.html")
 
 @app.get("/master")
 async def master_dashboard():
     """Личный кабинет мастера"""
-    return FileResponse(STATIC_DIR / "master-dashboard.html")
+    return FileResponse("static/master-dashboard.html")
 
 @app.get("/track")
 async def track_master():
     """Отслеживание мастера для клиента"""
-    return FileResponse(STATIC_DIR / "track.html")
+    return FileResponse("static/track.html")
 
 @app.get("/api")
 async def api_info():
