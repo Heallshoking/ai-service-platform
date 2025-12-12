@@ -134,12 +134,30 @@ app.add_middleware(
 @app.on_event("startup")
 async def startup_event():
     import os
+    from pathlib import Path
+    
+    print("="*60)
+    print("🔍 ДИАГНОСТИКА ОКРУЖЕНИЯ:")
     print(f"📂 Current working directory: {os.getcwd()}")
     print(f"📂 Files in current dir: {os.listdir('.')}")
-    if os.path.exists('static'):
-        print(f"✅ static/ exists, files: {os.listdir('static')}")
+    
+    # Проверка static/
+    static_path = Path("static")
+    if static_path.exists():
+        print(f"✅ static/ exists")
+        print(f"   Files: {list(static_path.glob('*'))}")
     else:
-        print("❌ static/ folder NOT FOUND!")
+        print(f"❌ static/ folder NOT FOUND!")
+        print(f"   Expected path: {static_path.absolute()}")
+        
+        # Попытка найти HTML файлы в других местах
+        print("🔍 Searching for HTML files...")
+        for root, dirs, files in os.walk('.'):
+            for file in files:
+                if file.endswith('.html'):
+                    print(f"   Found: {os.path.join(root, file)}")
+    
+    print("="*60)
     
     init_database()
     
@@ -258,27 +276,42 @@ def calculate_platform_fee(amount: float) -> Dict[str, float]:
 @app.get("/")
 async def root():
     """Главная страница - AI чат для клиентов"""
-    return FileResponse("static/ai-chat.html")
+    html_path = Path("static/ai-chat.html")
+    if not html_path.exists():
+        raise HTTPException(status_code=500, detail=f"HTML file not found: {html_path.absolute()}. CWD: {Path.cwd()}")
+    return FileResponse(html_path)
 
 @app.get("/form")
 async def form_page():
     """Простая форма для клиентов"""
-    return FileResponse("static/index.html")
+    html_path = Path("static/index.html")
+    if not html_path.exists():
+        raise HTTPException(status_code=500, detail=f"HTML file not found: {html_path.absolute()}")
+    return FileResponse(html_path)
 
 @app.get("/admin")
 async def admin_panel():
     """Админ-панель"""
-    return FileResponse("static/admin.html")
+    html_path = Path("static/admin.html")
+    if not html_path.exists():
+        raise HTTPException(status_code=500, detail=f"HTML file not found: {html_path.absolute()}")
+    return FileResponse(html_path)
 
 @app.get("/master")
 async def master_dashboard():
     """Личный кабинет мастера"""
-    return FileResponse("static/master-dashboard.html")
+    html_path = Path("static/master-dashboard.html")
+    if not html_path.exists():
+        raise HTTPException(status_code=500, detail=f"HTML file not found: {html_path.absolute()}")
+    return FileResponse(html_path)
 
 @app.get("/track")
 async def track_master():
     """Отслеживание мастера для клиента"""
-    return FileResponse("static/track.html")
+    html_path = Path("static/track.html")
+    if not html_path.exists():
+        raise HTTPException(status_code=500, detail=f"HTML file not found: {html_path.absolute()}")
+    return FileResponse(html_path)
 
 @app.get("/api")
 async def api_info():
