@@ -133,6 +133,14 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 # Инициализация БД при старте
 @app.on_event("startup")
 async def startup_event():
+    import os
+    print(f"📂 Current working directory: {os.getcwd()}")
+    print(f"📂 Files in current dir: {os.listdir('.')}")
+    if os.path.exists('static'):
+        print(f"✅ static/ exists, files: {os.listdir('static')}")
+    else:
+        print("❌ static/ folder NOT FOUND!")
+    
     init_database()
     
     # Инициализация Google интеграции
