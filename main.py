@@ -279,39 +279,204 @@ def calculate_platform_fee(amount: float) -> Dict[str, float]:
 
 @app.get("/")
 async def root():
-    """Главная страница - AI чат для клиентов"""
-    html_path = Path("static/ai-chat.html")
-    if not html_path.exists():
-        # Fallback: простой HTML с информацией
-        from fastapi.responses import HTMLResponse
-        return HTMLResponse(content=f"""
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <title>AI Service Platform</title>
-            <meta charset="utf-8">
-        </head>
-        <body style="font-family: Arial; max-width: 800px; margin: 50px auto; padding: 20px;">
-            <h1>⚠️ Static Files Not Found</h1>
-            <p><strong>Problem:</strong> HTML files are not deployed to Timeweb App Platform.</p>
-            <p><strong>Current path:</strong> {Path.cwd()}</p>
-            <p><strong>Expected:</strong> {html_path.absolute()}</p>
-            <hr>
-            <h2>✅ API is Working</h2>
-            <ul>
-                <li><a href="/api">/api</a> - API Info</li>
-                <li><a href="/docs">/docs</a> - API Documentation (Swagger)</li>
-                <li><a href="/health">/health</a> - Health Check</li>
-            </ul>
-            <hr>
-            <h3>🛠️ Quick Fix:</h3>
-            <p>1. Check if <code>static/</code> folder is in GitHub repository</p>
-            <p>2. Ensure Timeweb pulls latest code from GitHub</p>
-            <p>3. Check deployment logs on Timeweb dashboard</p>
-        </body>
-        </html>
-        """, status_code=200)
-    return FileResponse(html_path)
+    """Главная страница - Простая форма заказа"""
+    from fastapi.responses import HTMLResponse
+    
+    # 🔥 ВСТРОЕННЫЙ HTML (временное решение для Timeweb)
+    html_content = """
+    <!DOCTYPE html>
+    <html lang="ru">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>AI Service Platform - Заказ мастера</title>
+        <style>
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                min-height: 100vh;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 1rem;
+            }
+            .container {
+                background: white;
+                border-radius: 20px;
+                padding: 2rem;
+                max-width: 500px;
+                width: 100%;
+                box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            }
+            h1 {
+                color: #667eea;
+                margin-bottom: 0.5rem;
+                font-size: 2rem;
+            }
+            .subtitle {
+                color: #666;
+                margin-bottom: 2rem;
+                font-size: 0.9rem;
+            }
+            .form-group {
+                margin-bottom: 1.5rem;
+            }
+            label {
+                display: block;
+                margin-bottom: 0.5rem;
+                color: #333;
+                font-weight: 600;
+            }
+            input, select, textarea {
+                width: 100%;
+                padding: 0.75rem;
+                border: 2px solid #e0e0e0;
+                border-radius: 10px;
+                font-size: 1rem;
+                transition: border-color 0.3s;
+            }
+            input:focus, select:focus, textarea:focus {
+                outline: none;
+                border-color: #667eea;
+            }
+            textarea {
+                resize: vertical;
+                min-height: 100px;
+            }
+            .btn {
+                width: 100%;
+                padding: 1rem;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                border: none;
+                border-radius: 10px;
+                font-size: 1.1rem;
+                font-weight: 600;
+                cursor: pointer;
+                transition: transform 0.2s;
+            }
+            .btn:hover {
+                transform: translateY(-2px);
+            }
+            .btn:active {
+                transform: translateY(0);
+            }
+            .links {
+                margin-top: 1.5rem;
+                padding-top: 1.5rem;
+                border-top: 1px solid #e0e0e0;
+                display: flex;
+                justify-content: space-around;
+            }
+            .links a {
+                color: #667eea;
+                text-decoration: none;
+                font-size: 0.9rem;
+            }
+            .success {
+                background: #10b981;
+                color: white;
+                padding: 1rem;
+                border-radius: 10px;
+                margin-bottom: 1rem;
+                display: none;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>🔧 Вызов мастера</h1>
+            <p class="subtitle">Заполните форму, и мы найдём специалиста</p>
+            
+            <div id="successMessage" class="success"></div>
+            
+            <form id="orderForm">
+                <div class="form-group">
+                    <label>👤 Ваше имя</label>
+                    <input type="text" name="name" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>📱 Телефон</label>
+                    <input type="tel" name="phone" placeholder="+7 (900) 123-45-67" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>🔧 Категория услуги</label>
+                    <select name="category" required>
+                        <option value="">Выберите...</option>
+                        <option value="electrical">⚡ Электрика</option>
+                        <option value="plumbing">🚰 Сантехника</option>
+                        <option value="appliance">🔌 Бытовая техника</option>
+                        <option value="general">🔨 Общие работы</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>📍 Адрес</label>
+                    <input type="text" name="address" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>📝 Описание проблемы</label>
+                    <textarea name="problem_description" required></textarea>
+                </div>
+                
+                <button type="submit" class="btn">✨ Оформить заказ</button>
+            </form>
+            
+            <div class="links">
+                <a href="/docs">📚 API Docs</a>
+                <a href="/admin">⚙️ Админка</a>
+                <a href="/master">👨‍🔧 Мастер</a>
+            </div>
+        </div>
+        
+        <script>
+            const form = document.getElementById('orderForm');
+            const success = document.getElementById('successMessage');
+            
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const formData = new FormData(form);
+                const data = {
+                    name: formData.get('name'),
+                    phone: formData.get('phone'),
+                    category: formData.get('category'),
+                    problem_description: formData.get('problem_description'),
+                    address: formData.get('address')
+                };
+                
+                try {
+                    const response = await fetch('/api/v1/ai/web-form', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data)
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (response.ok) {
+                        success.style.display = 'block';
+                        success.textContent = `✅ Заказ #${result.job_id} принят! Примерная стоимость: ${result.estimated_price}₽`;
+                        form.reset();
+                        
+                        setTimeout(() => {
+                            success.style.display = 'none';
+                        }, 5000);
+                    }
+                } catch (error) {
+                    alert('❌ Ошибка отправки. Попробуйте позже.');
+                }
+            });
+        </script>
+    </body>
+    </html>
+    """
+    
+    return HTMLResponse(content=html_content)
 
 @app.get("/form")
 async def form_page():
@@ -324,18 +489,109 @@ async def form_page():
 @app.get("/admin")
 async def admin_panel():
     """Админ-панель"""
-    html_path = Path("static/admin.html")
-    if not html_path.exists():
-        raise HTTPException(status_code=500, detail=f"HTML file not found: {html_path.absolute()}")
-    return FileResponse(html_path)
+    from fastapi.responses import HTMLResponse
+    return HTMLResponse(content="""
+    <!DOCTYPE html>
+    <html lang="ru">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Админ-панель</title>
+        <style>
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+                background: #f5f5f5;
+                padding: 2rem;
+            }
+            .container { max-width: 1200px; margin: 0 auto; }
+            h1 { color: #333; margin-bottom: 2rem; }
+            .card {
+                background: white;
+                border-radius: 10px;
+                padding: 1.5rem;
+                margin-bottom: 1rem;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+            .btn {
+                display: inline-block;
+                padding: 0.75rem 1.5rem;
+                background: #667eea;
+                color: white;
+                text-decoration: none;
+                border-radius: 8px;
+                margin-right: 1rem;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>⚙️ Админ-панель</h1>
+            <div class="card">
+                <h2>📊 Статистика</h2>
+                <p>Здесь будет статистика заказов и мастеров</p>
+            </div>
+            <div class="card">
+                <a href="/docs" class="btn">📚 API Документация</a>
+                <a href="/" class="btn">← На главную</a>
+            </div>
+        </div>
+    </body>
+    </html>
+    """)
 
 @app.get("/master")
 async def master_dashboard():
     """Личный кабинет мастера"""
-    html_path = Path("static/master-dashboard.html")
-    if not html_path.exists():
-        raise HTTPException(status_code=500, detail=f"HTML file not found: {html_path.absolute()}")
-    return FileResponse(html_path)
+    from fastapi.responses import HTMLResponse
+    return HTMLResponse(content="""
+    <!DOCTYPE html>
+    <html lang="ru">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Личный кабинет мастера</title>
+        <style>
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                min-height: 100vh;
+                padding: 2rem;
+            }
+            .container {
+                max-width: 800px;
+                margin: 0 auto;
+                background: white;
+                border-radius: 20px;
+                padding: 2rem;
+            }
+            h1 { color: #667eea; margin-bottom: 2rem; }
+            .info { background: #f0f0f0; padding: 1rem; border-radius: 10px; margin-bottom: 1rem; }
+            .btn {
+                display: inline-block;
+                padding: 0.75rem 1.5rem;
+                background: #667eea;
+                color: white;
+                text-decoration: none;
+                border-radius: 8px;
+                margin-right: 1rem;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>👨‍🔧 Личный кабинет мастера</h1>
+            <div class="info">
+                <p>📍 Здесь будут ваши заказы и статистика</p>
+                <p>📊 Интеграция с Google Calendar и Tasks</p>
+            </div>
+            <a href="/docs" class="btn">📚 API Документация</a>
+            <a href="/" class="btn">← На главную</a>
+        </div>
+    </body>
+    </html>
+    """)
 
 @app.get("/track")
 async def track_master():

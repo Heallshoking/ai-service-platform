@@ -1,0 +1,20 @@
+# Timeweb App Platform Configuration
+runtime: python3.14
+
+# Явно указываем, что нужно включить static файлы
+include:
+  - static/
+  - static/**/*
+
+# Обработчики
+handlers:
+  - url: /static
+    static_dir: static
+  
+  - url: /.*
+    script: auto
+
+# Переменные окружения
+env_variables:
+  ENVIRONMENT: production
+  DEBUG: false
