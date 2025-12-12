@@ -127,8 +127,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Static files
-app.mount("/static", StaticFiles(directory="static"), name="static")
+# Static files - ОТКЛЮЧЕНО (отдаём через FileResponse напрямую)
+# app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # Инициализация БД при старте
 @app.on_event("startup")
