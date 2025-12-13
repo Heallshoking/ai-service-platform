@@ -30,6 +30,17 @@ except ImportError:
     PRICE_CALCULATOR_AVAILABLE = False
     print("⚠️ Калькулятор цен недоступен")
 
+# MVP Modules
+try:
+    from conversation_manager import ConversationManager, ConversationType, ConversationChannel
+    from job_file_generator import JobFileGenerator
+    from schedule_manager import ScheduleManager
+    from notification_service import NotificationService, NotificationType
+    MVP_MODULES_AVAILABLE = True
+except ImportError as e:
+    MVP_MODULES_AVAILABLE = False
+    print(f"⚠️ MVP модули недоступны: {e}")
+
 # ==================== КОНФИГУРАЦИЯ ====================
 
 # Переменные окружения
@@ -60,7 +71,14 @@ def init_database():
             rating REAL DEFAULT 5.0,
             is_active BOOLEAN DEFAULT 1,
             terminal_active BOOLEAN DEFAULT 0,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            
+            -- MVP Enhancement fields
+            schedule_json TEXT,
+            terminal_type TEXT DEFAULT 'smartphone',
+            terminal_id TEXT,
+            onboarding_conversation_id TEXT,
+            last_schedule_confirmation TIMESTAMP
         )
     """)
     
@@ -78,7 +96,7 @@ def init_database():
             master_id INTEGER,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             
-            -- 🔥 НОВЫЕ ПОЛЯ ДЛЯ ОТСЛЕЖИВАНИЯ
+            -- НОВЫЕ ПОЛЯ ДЛЯ ОТСЛЕЖИВАНИЯ
             master_departed_at TIMESTAMP,
             master_arrived_at TIMESTAMP,
             client_phone_revealed BOOLEAN DEFAULT 0,
@@ -87,6 +105,15 @@ def init_database():
             route_screenshot_url TEXT,
             google_calendar_event_id TEXT,
             google_task_id TEXT,
+            
+            -- MVP Enhancement fields
+            conversation_id TEXT,
+            ai_diagnosis TEXT,
+            work_instructions_json TEXT,
+            job_file_url TEXT,
+            media_urls TEXT,
+            estimated_duration INTEGER,
+            urgency_level TEXT DEFAULT 'standard',
             
             FOREIGN KEY (master_id) REFERENCES masters(id)
         )
@@ -103,7 +130,67 @@ def init_database():
             master_earnings REAL,
             status TEXT DEFAULT 'completed',
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            
+            -- MVP Enhancement fields
+            terminal_id TEXT,
+            payment_gateway_response TEXT,
+            commission_breakdown_json TEXT,
+            
             FOREIGN KEY (job_id) REFERENCES jobs(id)
+        )
+    """)
+    
+    # Таблица разговоров (новая)
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS conversations (
+            id TEXT PRIMARY KEY,
+            type TEXT NOT NULL,
+            channel TEXT NOT NULL,
+            participant_name TEXT,
+            participant_phone TEXT,
+            messages_json TEXT,
+            transcript TEXT,
+            audio_url TEXT,
+            status TEXT DEFAULT 'active',
+            extracted_data_json TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            completed_at TIMESTAMP
+        )
+    """)
+    
+    # Таблица инструкций (новая)
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS work_instructions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            job_id INTEGER NOT NULL,
+            problem_diagnosis TEXT NOT NULL,
+            tools_required TEXT,
+            consumables_required TEXT,
+            parts_required TEXT,
+            step_by_step TEXT,
+            safety_notes TEXT,
+            estimated_time INTEGER,
+            difficulty_level TEXT,
+            generated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (job_id) REFERENCES jobs(id)
+        )
+    """)
+    
+    # Таблица уведомлений (новая)
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS notifications (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            recipient_id TEXT NOT NULL,
+            recipient_type TEXT NOT NULL,
+            notification_type TEXT NOT NULL,
+            channel TEXT NOT NULL,
+            title TEXT,
+            message TEXT NOT NULL,
+            data_json TEXT,
+            status TEXT DEFAULT 'pending',
+            sent_at TIMESTAMP,
+            error TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     """)
     
